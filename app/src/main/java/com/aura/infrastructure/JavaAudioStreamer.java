@@ -137,10 +137,12 @@ public class JavaAudioStreamer implements AudioStreamer {
                 } catch (Exception ignored) {}
             }
         }
-        // Give OS audio HAL a brief moment (50ms) to cleanly unbind the mic
-        try {
-            Thread.sleep(50);
-        } catch (InterruptedException ignored) {}
+        // Give OS audio HAL a brief moment (20ms) to cleanly unbind the mic if not on UI thread
+        if (android.os.Looper.myLooper() != android.os.Looper.getMainLooper()) {
+            try {
+                Thread.sleep(20);
+            } catch (InterruptedException ignored) {}
+        }
     }
 
     @Override

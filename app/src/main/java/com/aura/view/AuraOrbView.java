@@ -33,8 +33,11 @@ public final class AuraOrbView extends View {
     private int primaryColor = Color.parseColor("#00E5FF");
     private int secondaryColor = Color.parseColor("#00B8D4");
 
+    private final android.graphics.Matrix gradientMatrix = new android.graphics.Matrix();
     private RadialGradient cachedGradient = null;
-    private float lastRadius = 0;
+    private float cachedBaseRadius = 0;
+    private int cachedPrimaryColor = 0;
+    private int cachedSecondaryColor = 0;
     private float lastCx = 0;
     private float lastCy = 0;
 
@@ -200,18 +203,28 @@ public final class AuraOrbView extends View {
         paintRing2.setAlpha(Math.max(0, Math.min(255, alpha2)));
         canvas.drawCircle(cx, cy, r2, paintRing2);
 
-        // 3. Draw luminous chromatic core sphere
-        if (cachedGradient == null || Math.abs(currentRadius - lastRadius) > 2.0f || cx != lastCx || cy != lastCy) {
-            lastRadius = currentRadius;
+        // 3. Draw luminous chromatic core sphere with zero-allocation Matrix transformation
+        if (cachedGradient == null || cachedPrimaryColor != primaryColor || cachedSecondaryColor != secondaryColor
+                || Math.abs(baseRadius - cachedBaseRadius) > 1.0f || cx != lastCx || cy != lastCy) {
+            cachedBaseRadius = baseRadius;
+            cachedPrimaryColor = primaryColor;
+            cachedSecondaryColor = secondaryColor;
             lastCx = cx;
             lastCy = cy;
             cachedGradient = new RadialGradient(
-                    cx, cy - (currentRadius * 0.15f), Math.max(1.0f, currentRadius * 1.05f),
+                    cx, cy - (baseRadius * 0.15f), Math.max(1.0f, baseRadius * 1.05f),
                     new int[]{primaryColor, secondaryColor, Color.argb(0, Color.red(secondaryColor), Color.green(secondaryColor), Color.blue(secondaryColor))},
                     new float[]{0f, 0.72f, 1.0f},
                     Shader.TileMode.CLAMP
             );
             paintCore.setShader(cachedGradient);
+        }
+
+        if (cachedGradient != null && baseRadius > 0) {
+            gradientMatrix.reset();
+            float scale = currentRadius / baseRadius;
+            gradientMatrix.postScale(scale, scale, cx, cy);
+            cachedGradient.setLocalMatrix(gradientMatrix);
         }
 
         canvas.drawCircle(cx, cy, currentRadius, paintCore);

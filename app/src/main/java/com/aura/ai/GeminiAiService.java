@@ -23,8 +23,8 @@ import java.util.concurrent.Executors;
 public class GeminiAiService implements AiLanguageModelService {
     private static final String TAG = "GeminiAiService";
     private static final String DEFAULT_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models/";
-    private static final int CONNECT_TIMEOUT_MS = 12000;
-    private static final int READ_TIMEOUT_MS = 18000;
+    private static final int CONNECT_TIMEOUT_MS = 6000;
+    private static final int READ_TIMEOUT_MS = 8000;
 
     private static final String SYSTEM_INSTRUCTION =
             "You are AURA, an empathetic, highly intelligent voice-first AI assistant designed for blind and visually impaired users. " +
@@ -453,8 +453,8 @@ public class GeminiAiService implements AiLanguageModelService {
             c = (HttpURLConnection) u.openConnection();
             c.setRequestMethod("GET");
             c.setRequestProperty("User-Agent", "AuraVoiceAssistant/1.0 (Android; Accessibility)");
-            c.setConnectTimeout(6000);
-            c.setReadTimeout(8000);
+            c.setConnectTimeout(2500);
+            c.setReadTimeout(3500);
             if (c.getResponseCode() == 200) {
                 return readStream(c.getInputStream());
             }

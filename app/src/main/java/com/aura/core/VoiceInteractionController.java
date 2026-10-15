@@ -171,9 +171,9 @@ public class VoiceInteractionController implements AutoCloseable {
         mainHandler.post(() -> {
             stateMachine.transitionTo(new ConversationState.WakeDetected());
 
-            // 1. Release wake detector microphone lock
+            // 1. Release wake detector microphone lock asynchronously off the main thread
             if (streamer != null) {
-                streamer.pause();
+                actionExecutor.execute(() -> streamer.pause());
             }
 
             // 2. Audible acoustic prompt for blind users
@@ -197,7 +197,8 @@ public class VoiceInteractionController implements AutoCloseable {
                         return;
                     }
                     stateMachine.transitionTo(new ConversationState.Processing());
-                    handleCommand(transcript);
+                    // Execute emotion analysis, intent classification and action execution in background
+                    actionExecutor.execute(() -> handleCommand(transcript));
                 });
             }
 
@@ -342,27 +343,25 @@ public class VoiceInteractionController implements AutoCloseable {
 
     private void executeActionDirectly(Intent intent, EmotionResult emotion, SentimentResult sentiment) {
         stateMachine.transitionTo(new ConversationState.Executing(intent));
-        actionExecutor.execute(() -> {
-            ActionResult result = orchestrator.executeAction(intent);
-            mainHandler.post(() -> {
-                if (result.getStatus() == ActionResult.ExecutionStatus.AMBIGUOUS) {
-                    // Disambiguation needed (e.g. multiple contacts named Rahul)
-                    if (intent instanceof Intent.SendMessage) {
-                        contextEngine.setAwaitingClarification("recipient", intent);
-                    } else if (intent instanceof Intent.CallContact) {
-                        contextEngine.setAwaitingClarification("contact", intent);
-                    }
-                    tts.speak(result.getDetail(), 1.0f, () -> startClarificationListening());
-                    return;
+        ActionResult result = orchestrator.executeAction(intent);
+        mainHandler.post(() -> {
+            if (result.getStatus() == ActionResult.ExecutionStatus.AMBIGUOUS) {
+                // Disambiguation needed (e.g. multiple contacts named Rahul)
+                if (intent instanceof Intent.SendMessage) {
+                    contextEngine.setAwaitingClarification("recipient", intent);
+                } else if (intent instanceof Intent.CallContact) {
+                    contextEngine.setAwaitingClarification("contact", intent);
                 }
+                tts.speak(result.getDetail(), 1.0f, () -> startClarificationListening());
+                return;
+            }
 
-                String rawResponse = result.getDetail();
-                String adaptedResponse = empatheticResponseEngine.adaptResponse(
-                        rawResponse, intent, sentiment, emotion, contextEngine
-                );
-                AdaptiveProsodyEngine.ProsodySettings prosody = adaptiveProsodyEngine.calculateProsody(emotion, sentiment);
-                tts.speak(adaptedResponse, prosody.getSpeechRate(), prosody.getPitch(), () -> returnToIdle());
-            });
+            String rawResponse = result.getDetail();
+            String adaptedResponse = empatheticResponseEngine.adaptResponse(
+                    rawResponse, intent, sentiment, emotion, contextEngine
+            );
+            AdaptiveProsodyEngine.ProsodySettings prosody = adaptiveProsodyEngine.calculateProsody(emotion, sentiment);
+            tts.speak(adaptedResponse, prosody.getSpeechRate(), prosody.getPitch(), () -> returnToIdle());
         });
     }
 

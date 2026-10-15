@@ -25,6 +25,9 @@ public class JavaSpeechRecognitionEngine implements SpeechRecognitionEngine {
     private SpeechListener currentListener;
     private boolean isListening = false;
 
+    private static volatile ComponentName cachedPreferredComponent = null;
+    private static volatile boolean checkedComponent = false;
+
     public JavaSpeechRecognitionEngine(Context context) {
         this.context = context.getApplicationContext();
     }
@@ -36,19 +39,26 @@ public class JavaSpeechRecognitionEngine implements SpeechRecognitionEngine {
             this.currentListener = listener;
 
             try {
-                // Find system speech recognizer service (excluding our own app to avoid recursive self-binding)
-                PackageManager pm = context.getPackageManager();
-                List<ResolveInfo> services = pm.queryIntentServices(
-                        new Intent(RecognitionService.SERVICE_INTERFACE), 0);
-                ComponentName preferredComponent = null;
-                for (ResolveInfo ri : services) {
-                    if (ri.serviceInfo != null && !ri.serviceInfo.packageName.equals(context.getPackageName())) {
-                        preferredComponent = new ComponentName(ri.serviceInfo.packageName, ri.serviceInfo.name);
-                        Log.i(TAG, "Discovered system speech recognizer: " + preferredComponent.flattenToShortString());
-                        break;
+                // Find system speech recognizer service (cached to avoid slow synchronous IPC)
+                if (!checkedComponent) {
+                    checkedComponent = true;
+                    try {
+                        PackageManager pm = context.getPackageManager();
+                        List<ResolveInfo> services = pm.queryIntentServices(
+                                new Intent(RecognitionService.SERVICE_INTERFACE), 0);
+                        for (ResolveInfo ri : services) {
+                            if (ri.serviceInfo != null && !ri.serviceInfo.packageName.equals(context.getPackageName())) {
+                                cachedPreferredComponent = new ComponentName(ri.serviceInfo.packageName, ri.serviceInfo.name);
+                                Log.i(TAG, "Discovered system speech recognizer: " + cachedPreferredComponent.flattenToShortString());
+                                break;
+                            }
+                        }
+                    } catch (Throwable t) {
+                        Log.w(TAG, "Failed resolving preferred component: " + t.getMessage());
                     }
                 }
 
+                ComponentName preferredComponent = cachedPreferredComponent;
                 if (preferredComponent != null) {
                     recognizer = SpeechRecognizer.createSpeechRecognizer(context, preferredComponent);
                 } else if (SpeechRecognizer.isRecognitionAvailable(context)) {
@@ -127,8 +137,10 @@ public class JavaSpeechRecognitionEngine implements SpeechRecognitionEngine {
                 intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
                 intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3);
                 intent.putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, false);
-                intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 2000L);
-                intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 2000L);
+                // Snappy 750ms silence detection instead of 2000ms delay for ultra-responsive voice feedback
+                intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 750L);
+                intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_POSSIBLY_COMPLETE_SILENCE_LENGTH_MILLIS, 750L);
+                intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, 800L);
 
                 recognizer.startListening(intent);
             } catch (Exception e) {
