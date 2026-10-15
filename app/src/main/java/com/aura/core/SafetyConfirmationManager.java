@@ -20,6 +20,10 @@ public class SafetyConfirmationManager {
 
     public synchronized boolean needsConfirmation(Intent intent) {
         if (intent == null) return false;
+        // Emergency commands are life-critical and must dispatch immediately without confirmation delays
+        if (intent instanceof Intent.Emergency) {
+            return false;
+        }
         SafetyLevel level = intent.getSafetyLevel();
         if (level == SafetyLevel.HIGH || level == SafetyLevel.CRITICAL) {
             setPendingIntent(intent);

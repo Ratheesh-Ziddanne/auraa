@@ -1,10 +1,14 @@
 package com.aura;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.HapticFeedbackConstants;
 import android.widget.Button;
 import android.widget.TextView;
@@ -12,6 +16,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import com.aura.infrastructure.AuraVisionEngine;
 import com.aura.infrastructure.SpectralSpeakerRecognitionEngine;
 import com.aura.platform.AuraService;
@@ -42,9 +47,16 @@ public class MainActivity extends AppCompatActivity {
     private PermissionManager permissionManager;
     private PersonalMemoryService memoryService;
 
+    private static volatile MainActivity instance;
+
+    public static MainActivity getInstance() {
+        return instance;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        instance = this;
         getWindow().addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setContentView(R.layout.activity_main);
 
@@ -316,6 +328,18 @@ public class MainActivity extends AppCompatActivity {
         if (!permissionManager.hasRecordAudioPermission()) {
             needed.add(Manifest.permission.RECORD_AUDIO);
         }
+        if (!permissionManager.hasCallPhonePermission()) {
+            needed.add(Manifest.permission.CALL_PHONE);
+        }
+        if (!permissionManager.hasContactsPermission()) {
+            needed.add(Manifest.permission.READ_CONTACTS);
+        }
+        if (!permissionManager.hasSmsPermission()) {
+            needed.add(Manifest.permission.SEND_SMS);
+        }
+        if (!permissionManager.hasLocationPermission()) {
+            needed.add(Manifest.permission.ACCESS_FINE_LOCATION);
+        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (!permissionManager.hasNotificationPermission()) {
                 needed.add(Manifest.permission.POST_NOTIFICATIONS);
@@ -353,6 +377,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         AuraService.setStatusListener(null);
+        if (instance == this) {
+            instance = null;
+        }
         super.onDestroy();
     }
 
@@ -535,5 +562,44 @@ public class MainActivity extends AppCompatActivity {
                 .setMessage(message)
                 .setPositiveButton("OK", null)
                 .show();
+    }
+
+
+    public static boolean placePhoneCall(Context callerContext, String phoneNumber) {
+        if (phoneNumber == null || phoneNumber.trim().isEmpty()) return false;
+        String cleanNumber = com.aura.service.contact.ContactResolver.sanitizePhoneNumber(phoneNumber);
+        if (cleanNumber.isEmpty()) cleanNumber = phoneNumber.trim();
+
+        Context targetCtx = instance != null ? instance : callerContext;
+        if (targetCtx == null) return false;
+
+        // Try direct TelecomManager placement first (works reliably on modern Android with CALL_PHONE)
+        if (ContextCompat.checkSelfPermission(targetCtx, Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED) {
+            try {
+                android.telecom.TelecomManager tm = (android.telecom.TelecomManager) targetCtx.getSystemService(Context.TELECOM_SERVICE);
+                if (tm != null) {
+                    android.os.Bundle extras = new android.os.Bundle();
+                    extras.putBoolean(android.telecom.TelecomManager.EXTRA_START_CALL_WITH_SPEAKERPHONE, true);
+                    tm.placeCall(Uri.parse("tel:" + Uri.encode(cleanNumber)), extras);
+                    Log.i("MainActivity", "TelecomManager placed emergency call to " + cleanNumber);
+                    return true;
+                }
+            } catch (Exception e) {
+                Log.w("MainActivity", "TelecomManager call failed, falling back to Intent: " + e.getMessage());
+            }
+        }
+
+        // Fallback to Intent (prioritize Activity context so Android 10+ background restriction does not block)
+        try {
+            boolean hasCallPermission = ContextCompat.checkSelfPermission(targetCtx, Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED;
+            Intent callIntent = new Intent(hasCallPermission ? Intent.ACTION_CALL : Intent.ACTION_DIAL,
+                    Uri.parse("tel:" + Uri.encode(cleanNumber)));
+            callIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            targetCtx.startActivity(callIntent);
+            return true;
+        } catch (Exception e) {
+            Log.e("MainActivity", "Failed to start call Activity: " + e.getMessage());
+            return false;
+        }
     }
 }

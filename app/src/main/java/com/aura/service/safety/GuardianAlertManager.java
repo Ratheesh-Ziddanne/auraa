@@ -241,22 +241,12 @@ public class GuardianAlertManager {
         boolean isServiceFallback = (phone == null || phone.isEmpty());
         String targetNumber = isServiceFallback ? DEFAULT_EMERGENCY_SERVICE_NUMBER : phone;
 
-        Intent callIntent;
-        boolean hasCallPermission = ContextCompat.checkSelfPermission(context, Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED;
-
-        if (hasCallPermission && !isServiceFallback) {
-            callIntent = new Intent(Intent.ACTION_CALL, Uri.parse("tel:" + targetNumber));
-        } else {
-            callIntent = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + targetNumber));
-        }
-
-        callIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        try {
-            context.startActivity(callIntent);
-            Log.i(TAG, "Emergency call initiated to " + targetNumber);
+        boolean success = com.aura.MainActivity.placePhoneCall(context, targetNumber);
+        if (success) {
+            Log.i(TAG, "Emergency call successfully placed to " + targetNumber);
             return true;
-        } catch (Exception e) {
-            Log.e(TAG, "Failed to initiate emergency call: " + e.getMessage());
+        } else {
+            Log.e(TAG, "Failed to initiate emergency call to " + targetNumber);
             return false;
         }
     }

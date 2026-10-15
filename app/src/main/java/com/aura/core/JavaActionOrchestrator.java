@@ -859,17 +859,9 @@ public class JavaActionOrchestrator {
                     sent = guardianAlertManager.sendEmergencyAlert();
                 }
 
-                // Schedule emergency call with delay so the user hears the audio alert before the dialer window appears
+                // Immediately place emergency call to the guardian
                 if (context != null) {
-                    try {
-                        new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
-                            if (guardianAlertManager != null) {
-                                guardianAlertManager.initiateEmergencyCall(context);
-                            }
-                        }, 3500);
-                    } catch (Throwable t) {
-                        guardianAlertManager.initiateEmergencyCall(context);
-                    }
+                    guardianAlertManager.initiateEmergencyCall(context);
                 }
 
                 String contactLabel = (guardianName != null && !guardianName.equalsIgnoreCase("Guardian")) ? guardianName : "your emergency contact";
@@ -884,15 +876,7 @@ public class JavaActionOrchestrator {
                 return new ActionResult(ActionResult.ExecutionStatus.SUCCESS, Platform.SYSTEM, msg);
             } else {
                 if (context != null) {
-                    try {
-                        new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
-                            if (guardianAlertManager != null) {
-                                guardianAlertManager.initiateEmergencyCall(context);
-                            }
-                        }, 3500);
-                    } catch (Throwable t) {
-                        guardianAlertManager.initiateEmergencyCall(context);
-                    }
+                    guardianAlertManager.initiateEmergencyCall(context);
                 }
                 String registeredContactName = (guardianName != null && !guardianName.equalsIgnoreCase("Guardian")) ? guardianName : null;
                 if (registeredContactName == null && memoryService != null) {
@@ -1044,15 +1028,12 @@ public class JavaActionOrchestrator {
 
         if (context != null) {
             try {
-                Intent callIntent;
-                if (permissionManager.hasCallPhonePermission()) {
-                    callIntent = new Intent(Intent.ACTION_CALL, Uri.parse("tel:" + Uri.encode(phoneNumber)));
+                boolean placed = com.aura.MainActivity.placePhoneCall(context, phoneNumber);
+                if (placed) {
+                    return new ActionResult(ActionResult.ExecutionStatus.SUCCESS, Platform.CALL, "Placing call to " + name + ".");
                 } else {
-                    callIntent = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + Uri.encode(phoneNumber)));
+                    return new ActionResult(ActionResult.ExecutionStatus.FAILED, Platform.CALL, "Unable to place call to " + name + ".");
                 }
-                callIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                context.startActivity(callIntent);
-                return new ActionResult(ActionResult.ExecutionStatus.SUCCESS, Platform.CALL, "Placing call to " + name + ".");
             } catch (Exception e) {
                 return new ActionResult(ActionResult.ExecutionStatus.FAILED, Platform.CALL, "Unable to place call: " + e.getMessage());
             }
