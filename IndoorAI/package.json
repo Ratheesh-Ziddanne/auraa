@@ -1,0 +1,28 @@
+{
+  "name": "indoor-ai-navigation",
+  "version": "1.0.0",
+  "description": "AI-Powered Indoor Navigation System for Visually Impaired Users",
+  "main": "backend/server.js",
+  "scripts": {
+    "start": "node backend/server.js",
+    "dev": "node backend/server.js",
+    "seed": "node database/seed.js",
+    "test": "node backend/tests/test_api.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "cors": "^2.8.5",
+    "sqlite3": "^5.1.7"
+  },
+  "devDependencies": {},
+  "keywords": [
+    "indoor-navigation",
+    "obstacle-detection",
+    "sentiment-analysis",
+    "accessibility",
+    "visually-impaired",
+    "ai"
+  ],
+  "author": "AURA AI Team",
+  "license": "MIT"
+}

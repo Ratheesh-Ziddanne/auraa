@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AppFunctionAppMetadata xmlns:appfn="http://schemas.android.com/apk/androidx.appfunctions"
+    appfn:description="AURA is a voice-first assistant providing messaging, spatial navigation, and visual descriptions for accessibility."
+    appfn:displayDescription="@string/user_visible_description" />

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">AURA</string>
+    <string name="tagline_eyes_free">EYES-FREE AI ASSISTANT</string>
+    <string name="user_visible_description">AURA: Your eyes-free assistant for accessibility and safety.</string>
+    <string name="desc_aura_orb">AURA Voice Visualizer Orb. Tap to activate voice assistant or speak freely.</string>
+    <string name="status_always_listening">Always Listening</string>
+    <string name="status_subtitle_hint">Tap orb to speak • or say \"Hey Aura\"</string>
+    <string name="desc_status_text">Current Assistant Status</string>
+    <string name="btn_privacy_security">Privacy &amp; Security</string>
+    <string name="desc_privacy_security">Privacy and Security controls. View permissions and manage stored data.</string>
+    <string name="assistant_service_ready">Assistant Service is ready</string>
+
+    <!-- Quick Action Chips -->
+    <string name="quick_speak">Speak</string>
+    <string name="desc_quick_speak">Tap to activate microphone and speak</string>
+    <string name="quick_scan">Scan Path</string>
+    <string name="desc_quick_scan">Optical sensor scan for obstacles ahead</string>
+    <string name="quick_nav">Indoor Nav</string>
+    <string name="desc_quick_nav">Navigate to saved rooms or anchors</string>
+    <string name="quick_sos">Guardian SOS</string>
+    <string name="desc_quick_sos">Emergency distress alert with live location to saved guardian</string>
+    <string name="quick_fun">Fun &amp; Media</string>
+    <string name="desc_quick_fun">Play music, tell a joke, riddle or fun fact</string>
+</resources>

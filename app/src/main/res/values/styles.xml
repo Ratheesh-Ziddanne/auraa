@@ -1,0 +1,12 @@
+<resources>
+    <style name="Theme.Aura" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="android:fontFamily">sans-serif-medium</item>
+        <item name="colorPrimary">@color/aura_cyan_glow</item>
+        <item name="colorPrimaryVariant">@color/aura_cyan_deep</item>
+        <item name="colorSecondary">@color/aura_purple_accent</item>
+        <item name="android:colorAccent">@color/aura_cyan_glow</item>
+        <item name="android:windowBackground">@color/aura_bg_dark</item>
+        <item name="android:statusBarColor">@color/aura_bg_dark</item>
+        <item name="android:navigationBarColor">@color/aura_bg_dark</item>
+    </style>
+</resources>

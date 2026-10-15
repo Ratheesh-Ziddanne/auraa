@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IndoorAI - AI-Powered Indoor Navigation & Safety Platform</title>
+    <meta name="description" content="AI-powered indoor navigation system for visually impaired users combining obstacle detection, indoor positioning, and sentiment analysis.">
+    <link rel="stylesheet" href="../styles/main.css">
+</head>
+<body>
+    <a href="#mainContent" class="skip-link">Skip to main content (Screen Readers)</a>
+
+    <!-- Top Navigation Header -->
+    <header class="top-header" role="banner">
+        <div class="brand-section">
+            <div class="brand-icon" aria-hidden="true">A</div>
+            <div>
+                <h1 class="brand-title">IndoorAI</h1>
+                <div class="brand-sub">Voice & Vision Indoor Guidance System</div>
+            </div>
+        </div>
+
+        <div class="header-controls">
+            <!-- AI Mode Status (Section 14) -->
+            <div class="ai-status-badge" id="aiModeBadge" role="status" aria-live="polite">
+                <span class="dot" aria-hidden="true"></span>
+                <span id="aiModeText">AI MODE: ACTIVE (YOLO + DistilBERT + BLE)</span>
+            </div>
+
+            <!-- High Contrast Toggle -->
+            <button class="btn btn-secondary" id="btnContrastToggle" aria-label="Toggle High Contrast Display">
+                High Contrast
+            </button>
+
+            <!-- Emergency SOS Giant Button (Section 8) -->
+            <button class="btn btn-emergency" id="btnEmergencySos" aria-label="Emergency SOS - Trigger Immediate Safe Point Guidance">
+                EMERGENCY SOS
+            </button>
+        </div>
+    </header>
+
+    <!-- Voice Assistant Interactive Bar (Section 10) -->
+    <section class="voice-hero" aria-label="Voice Interaction Assistant">
+        <div class="voice-orb-container" id="voiceOrbContainer" role="button" tabindex="0" aria-label="Toggle Voice Listening">
+            <div class="voice-orb" id="voiceOrb" aria-hidden="true">
+                <span id="voiceOrbIcon">🎤</span>
+            </div>
+            <div>
+                <div style="font-weight: 800; font-size: 1.1rem;" id="voiceStatusText">Tap Orb or Say "AURA" to Speak</div>
+                <div style="font-size: 0.85rem; color: var(--text-muted);">Voice-first hands-free navigation active</div>
+            </div>
+        </div>
+
+        <div class="voice-transcript-box" id="voiceTranscriptBox" role="status" aria-live="polite">
+            "Awaiting your voice command... (e.g., 'Take me to the library')"
+        </div>
+    </section>
+
+    <!-- Main Application Grid -->
+    <main class="main-container" id="mainContent" role="main">
+        <!-- Left Column: Navigation Controls, Step Guidance, Obstacle, Emotion -->
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+            
+            <!-- Destination & Location Card -->
+            <section class="card" aria-labelledby="locCardTitle">
+                <div class="card-header">
+                    <h2 class="card-title" id="locCardTitle">📍 Navigation Target</h2>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn btn-primary" id="btnStartNav" aria-label="Start Navigation">Start Guidance</button>
+                        <button class="btn btn-secondary" id="btnStopNav" aria-label="Stop Navigation">Stop</button>
+                    </div>
+                </div>
+
+                <div class="nav-status-grid">
+                    <div class="status-tile">
+                        <div class="status-label">Current Location (BLE)</div>
+                        <div class="status-value highlight" id="lblCurrentLoc">Block A Entrance</div>
+                    </div>
+                    <div class="status-tile">
+                        <div class="status-label">Target Destination</div>
+                        <select id="selDestination" style="width: 100%; margin-top: 4px; padding: 6px; font-weight: 700; background: #000; color: #fff; border: 1px solid var(--border-color); border-radius: 6px;">
+                            <option value="Computer Lab">Computer Lab (Floor 1)</option>
+                            <option value="Library" selected>Library (Floor 1)</option>
+                            <option value="Cafeteria">Cafeteria (Ground Floor)</option>
+                            <option value="Help Desk / Reception">Help Desk / Reception (Ground Floor)</option>
+                            <option value="Emergency Exit Ground Floor">Emergency Exit A (Ground Floor)</option>
+                        </select>
+                    </div>
+                    <div class="status-tile">
+                        <div class="status-label">Distance Remaining</div>
+                        <div class="status-value" id="lblDistance">95 metres</div>
+                    </div>
+                    <div class="status-tile">
+                        <div class="status-label">Estimated Walking Time</div>
+                        <div class="status-value" id="lblEstTime">2.2 minutes</div>
+                    </div>
+                </div>
+
+                <!-- Active Step Instruction Banner -->
+                <div class="current-instruction-box" id="stepInstructionBox" role="region" aria-live="polite">
+                    <div class="instruction-icon" id="stepIcon">➡️</div>
+                    <div>
+                        <div class="instruction-text" id="stepInstructionText">Move straight along Main Corridor for 20 metres.</div>
+                        <div class="instruction-sub" id="stepInstructionSub">Follow centered tactile paving. Central staircase is on your left ahead.</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Real-Time Obstacle Detection Card (Section 2 & 13) -->
+            <section class="card obstacle-card SAFE" id="obstacleCard" aria-labelledby="obsCardTitle">
+                <div class="card-header">
+                    <h2 class="card-title" id="obsCardTitle">🛡️ Real-Time Obstacle Detection</h2>
+                    <span class="obstacle-badge SAFE" id="obstacleRiskBadge">SAFE</span>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                    <div>
+                        <div style="font-size: 0.85rem; color: var(--text-muted);">DETECTED OBJECT</div>
+                        <div style="font-size: 1.4rem; font-weight: 800;" id="obstacleType">No Obstacle in Path</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 0.85rem; color: var(--text-muted);">DISTANCE ESTIMATE</div>
+                        <div style="font-size: 1.4rem; font-weight: 800; color: var(--accent-amber);" id="obstacleDistance">Clear (> 4m)</div>
+                    </div>
+                    <div style="flex: 100%;">
+                        <div style="font-size: 0.95rem; font-weight: 700; color: #fff;" id="obstacleGuidance">Path ahead is clear. Maintain forward cane sweeping.</div>
+                    </div>
+                </div>
+
+                <!-- Camera Preview Viewfinder -->
+                <div class="camera-feed-container" aria-label="Camera Live Viewfinder">
+                    <video id="cameraVideo" autoplay playsinline muted></video>
+                    <canvas id="cameraOverlayCanvas"></canvas>
+                </div>
+            </section>
+
+            <!-- Sentiment & Emotion Analysis Card (Section 3 & 4) -->
+            <section class="card" aria-labelledby="emoCardTitle">
+                <div class="card-header">
+                    <h2 class="card-title" id="emoCardTitle">🧠 Emotion-Aware Adaptive Assistance</h2>
+                    <span class="guidance-style-badge" id="guidanceStyleBadge">STYLE: STANDARD</span>
+                </div>
+
+                <div class="emotion-meter">
+                    <div class="emotion-icon" id="emotionIcon">😊</div>
+                    <div class="emotion-details">
+                        <div class="emotion-title" id="emotionLabel">State: CALM</div>
+                        <div class="emotion-confidence" id="emotionConfidence">Confidence: 94% | Prosody: 1.0x Rate</div>
+                    </div>
+                </div>
+
+                <div style="font-size: 0.95rem; color: var(--text-secondary);" id="emotionAdaptationDescription">
+                    AI communication is operating in normal guidance mode, providing steady distance and clock-face turn instructions.
+                </div>
+            </section>
+        </div>
+
+        <!-- Right Column: Interactive Floor Map, Scenario Runner, Voice Shortcuts -->
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+            
+            <!-- Indoor Map Card (Section 1 & 7) -->
+            <section class="card" aria-labelledby="mapCardTitle">
+                <div class="card-header">
+                    <h2 class="card-title" id="mapCardTitle">🗺️ Indoor Building Floorplan</h2>
+                    <div style="display: flex; gap: 6px;">
+                        <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.85rem;" id="btnFloor0">Ground Floor</button>
+                        <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.85rem;" id="btnFloor1">1st Floor</button>
+                    </div>
+                </div>
+
+                <div class="map-canvas-container" aria-label="Visual Floorplan Canvas showing path and beacons">
+                    <canvas id="indoorMapCanvas"></canvas>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted);">
+                    <span>🔵 Blue Beacon: BLE Indoor Anchor</span>
+                    <span>🟠 Orange Line: Active Calculated Path</span>
+                    <span>🟢 Green: User Position</span>
+                </div>
+            </section>
+
+            <!-- Final Demonstration Scenario Runner Card (Section 17) -->
+            <section class="card demo-runner-card" aria-labelledby="demoCardTitle">
+                <div class="card-header">
+                    <h2 class="card-title" id="demoCardTitle">🎬 End-to-End Demonstration Scenario</h2>
+                    <button class="btn btn-primary" id="btnRunScenario" aria-label="Run Complete 17-Step Prototype Demonstration">
+                        ▶ Run Full Demo
+                    </button>
+                </div>
+
+                <p style="font-size: 0.9rem; color: var(--text-secondary);">
+                    Demonstrates the full 17-step user scenario: Entrance positioning &rarr; Route calculation &rarr; Camera obstacle detection &rarr; User anxiety &rarr; Communication adaptation &rarr; Corridor blockage &rarr; Safer recalculation &rarr; Library arrival.
+                </p>
+
+                <div class="scenario-steps-list" id="scenarioStepsList" role="list">
+                    <div class="scenario-step-item" role="listitem">1. User enters building (BLE position identified)</div>
+                    <div class="scenario-step-item" role="listitem">2. User says: "Take me to the library"</div>
+                    <div class="scenario-step-item" role="listitem">3. Speech-to-text converts command</div>
+                    <div class="scenario-step-item" role="listitem">4. Navigation engine calculates route (95m)</div>
+                    <div class="scenario-step-item" role="listitem">5. Voice guidance begins</div>
+                    <div class="scenario-step-item" role="listitem">6. Camera continuously scans surroundings</div>
+                    <div class="scenario-step-item" role="listitem">7. Obstacle detected in path: Chair</div>
+                    <div class="scenario-step-item" role="listitem">8. AI estimates distance (2.8m) & Caution risk</div>
+                    <div class="scenario-step-item" role="listitem">9. Voice warning generated to step right</div>
+                    <div class="scenario-step-item" role="listitem">10. User distress: "I don't know where I am"</div>
+                    <div class="scenario-step-item" role="listitem">11. Sentiment detects CONFUSED / ANXIOUS (89%)</div>
+                    <div class="scenario-step-item" role="listitem">12. AI changes tone to supportive landmark guide</div>
+                    <div class="scenario-step-item" role="listitem">13. Staircase corridor blocked by obstruction</div>
+                    <div class="scenario-step-item" role="listitem">14. AI recalculates safer route via Elevator</div>
+                    <div class="scenario-step-item" role="listitem">15. Floor transition to 1F</div>
+                    <div class="scenario-step-item" role="listitem">16. Approach to Library double doors</div>
+                    <div class="scenario-step-item" role="listitem">17. Safe arrival & navigation completed</div>
+                </div>
+            </section>
+
+            <!-- Voice Quick Cheatsheet -->
+            <section class="card" aria-labelledby="voiceCmdTitle">
+                <div class="card-header">
+                    <h2 class="card-title" id="voiceCmdTitle">🎙️ Voice Commands Cheatsheet</h2>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; font-size: 0.9rem;">
+                    <button class="btn btn-secondary" style="font-size: 0.85rem; padding: 8px 12px; justify-content: flex-start;" onclick="app.executeVoiceCommand('Where am I?')">🗣️ "Where am I?"</button>
+                    <button class="btn btn-secondary" style="font-size: 0.85rem; padding: 8px 12px; justify-content: flex-start;" onclick="app.executeVoiceCommand('Take me to the library')">🗣️ "Take me to library"</button>
+                    <button class="btn btn-secondary" style="font-size: 0.85rem; padding: 8px 12px; justify-content: flex-start;" onclick="app.executeVoiceCommand('Take me to computer lab')">🗣️ "Take me to computer lab"</button>
+                    <button class="btn btn-secondary" style="font-size: 0.85rem; padding: 8px 12px; justify-content: flex-start;" onclick="app.executeVoiceCommand('Is there anything in front of me?')">🗣️ "What is in front?"</button>
+                    <button class="btn btn-secondary" style="font-size: 0.85rem; padding: 8px 12px; justify-content: flex-start;" onclick="app.executeVoiceCommand('Find nearest exit')">🗣️ "Find nearest exit"</button>
+                    <button class="btn btn-secondary" style="font-size: 0.85rem; padding: 8px 12px; justify-content: flex-start;" onclick="app.executeVoiceCommand('Repeat that')">🗣️ "Repeat that"</button>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer role="contentinfo">
+        <div><strong>IndoorAI</strong> &copy; 2026 - Multimodal Vision, Navigation, & Sentiment Safety System</div>
+        <div>Compliant with W3C WAI-ARIA Accessible Guidelines for Visually Impaired Users</div>
+    </footer>
+
+    <!-- Frontend Application Scripts -->
+    <script src="../services/apiClient.js"></script>
+    <script src="../components/mapViewer.js"></script>
+    <script src="../components/obstacleCamera.js"></script>
+    <script src="../components/voiceAssistant.js"></script>
+    <script src="../components/scenarioRunner.js"></script>
+    <script src="../app.js"></script>
+</body>
+</html>

@@ -1,0 +1,61 @@
+# Android / Gradle build and IDE
+*.iml
+.gradle/
+**/.gradle/
+local.properties
+**/local.properties
+.idea/
+**/.idea/
+.kotlin/
+**/.kotlin/
+.vscode/
+**/.vscode/
+.artifacts/
+**/.artifacts/
+
+# Build outputs
+build/
+**/build/
+bin/
+gen/
+out/
+captures/
+.cxx/
+**/intermediates/
+**/generated/
+*.apk
+*.aab
+*.ap_
+*.dex
+*.class
+
+# Node / IndoorAI
+node_modules/
+**/node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Databases and runtime data
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+
+# Environment, tokens and secrets
+.env
+.env.*
+*.env
+*.jks
+*.keystore
+*.p12
+*.pem
+*.key
+google-services.json
+
+# OS & temporary files
+.DS_Store
+Thumbs.db
+*.log
+*.tmp

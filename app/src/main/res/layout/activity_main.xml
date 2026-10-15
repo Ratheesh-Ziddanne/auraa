@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_main_gradient"
+    android:padding="20dp"
+    tools:ignore="Overdraw">
+
+    <!-- Top Brand & Live Status Bar -->
+    <LinearLayout
+        android:id="@+id/topBar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:letterSpacing="0.06"
+                android:text="@string/app_name"
+                android:textColor="@color/aura_text_primary"
+                android:textSize="26sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:letterSpacing="0.1"
+                android:text="@string/tagline_eyes_free"
+                android:textColor="@color/aura_cyan_glow"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- Live Status Pill -->
+        <LinearLayout
+            android:id="@+id/statusPill"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_status_badge"
+            android:gravity="center_vertical"
+            android:paddingStart="12dp"
+            android:paddingTop="6dp"
+            android:paddingEnd="12dp"
+            android:paddingBottom="6dp">
+
+            <View
+                android:layout_width="8dp"
+                android:layout_height="8dp"
+                android:layout_marginEnd="6dp"
+                android:background="@drawable/dot_online" />
+
+            <TextView
+                android:id="@+id/tvOnlineStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="ONLINE"
+                android:textColor="@color/aura_online_dot"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Centerpiece Aura Voice Visualizer Orb -->
+    <com.aura.view.AuraOrbView
+        android:id="@+id/auraOrb"
+        android:layout_width="260dp"
+        android:layout_height="260dp"
+        android:contentDescription="@string/desc_aura_orb"
+        app:layout_constraintBottom_toTopOf="@+id/cardAssistantStatus"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/topBar"
+        app:layout_constraintVertical_bias="0.45" />
+
+    <TextView
+        android:id="@+id/tvOrbHint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/status_subtitle_hint"
+        android:textColor="@color/aura_text_secondary"
+        android:textSize="13sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/auraOrb" />
+
+    <!-- Glassmorphic Assistant Live Status & Transcript Card -->
+    <LinearLayout
+        android:id="@+id/cardAssistantStatus"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/bg_glass_card"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:padding="18dp"
+        app:layout_constraintBottom_toTopOf="@+id/quickActionGrid"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <TextView
+            android:id="@+id/statusText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/desc_status_text"
+            android:gravity="center"
+            android:lineSpacingExtra="4dp"
+            android:text="@string/status_always_listening"
+            android:textColor="@color/aura_text_primary"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/statusSubtext"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:gravity="center"
+            android:text="Ready for voice commands"
+            android:textColor="@color/aura_cyan_glow"
+            android:textSize="12sp" />
+    </LinearLayout>
+
+    <!-- Quick Action Interactive Dock for Hands-Free & Low-Vision Users -->
+    <LinearLayout
+        android:id="@+id/quickActionGrid"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="14dp"
+        android:gravity="center"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toTopOf="@+id/bottomControlBar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <!-- Quick Speak -->
+        <Button
+            android:id="@+id/btnQuickSpeak"
+            android:layout_width="0dp"
+            android:layout_height="52dp"
+            android:layout_marginEnd="6dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_quick_chip"
+            android:contentDescription="@string/desc_quick_speak"
+            android:text="@string/quick_speak"
+            android:textAllCaps="false"
+            android:textColor="@color/aura_text_primary"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            app:backgroundTint="@null" />
+
+        <!-- Obstacle Scan -->
+        <Button
+            android:id="@+id/btnQuickScan"
+            android:layout_width="0dp"
+            android:layout_height="52dp"
+            android:layout_marginEnd="6dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_quick_chip"
+            android:contentDescription="@string/desc_quick_scan"
+            android:text="@string/quick_scan"
+            android:textAllCaps="false"
+            android:textColor="@color/aura_text_primary"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            app:backgroundTint="@null" />
+
+        <!-- Indoor Navigation -->
+        <Button
+            android:id="@+id/btnQuickNav"
+            android:layout_width="0dp"
+            android:layout_height="52dp"
+            android:layout_marginEnd="6dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_quick_chip"
+            android:contentDescription="@string/desc_quick_nav"
+            android:text="@string/quick_nav"
+            android:textAllCaps="false"
+            android:textColor="@color/aura_text_primary"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            app:backgroundTint="@null" />
+
+        <!-- Fun & Entertainment -->
+        <Button
+            android:id="@+id/btnQuickFun"
+            android:layout_width="0dp"
+            android:layout_height="52dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_quick_chip"
+            android:contentDescription="@string/desc_quick_fun"
+            android:text="@string/quick_fun"
+            android:textAllCaps="false"
+            android:textColor="@color/aura_text_primary"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            app:backgroundTint="@null" />
+    </LinearLayout>
+
+    <!-- Bottom Safety & Privacy Controls -->
+    <LinearLayout
+        android:id="@+id/bottomControlBar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <!-- Privacy & Security -->
+        <Button
+            android:id="@+id/btnPrivacySettings"
+            android:layout_width="0dp"
+            android:layout_height="52dp"
+            android:layout_marginEnd="8dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_quick_chip"
+            android:contentDescription="@string/desc_privacy_security"
+            android:text="@string/btn_privacy_security"
+            android:textAllCaps="false"
+            android:textColor="@color/aura_text_secondary"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            app:backgroundTint="@null" />
+
+        <!-- Emergency SOS Button -->
+        <Button
+            android:id="@+id/btnQuickSos"
+            android:layout_width="0dp"
+            android:layout_height="52dp"
+            android:layout_weight="1"
+            android:background="@drawable/bg_sos_button"
+            android:contentDescription="@string/desc_quick_sos"
+            android:text="@string/quick_sos"
+            android:textAllCaps="false"
+            android:textColor="@color/aura_text_primary"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            app:backgroundTint="@null" />
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

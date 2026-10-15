@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="ic_launcher_background">#FFFFFF</color>
+
+    <!-- Deep Luxury Obsidian Dark Theme -->
+    <color name="aura_bg_dark">#070B14</color>
+
+    <!-- High Contrast Vibrant Accents (WCAG AAA Compliant) -->
+    <color name="aura_cyan_glow">#00E5FF</color>
+    <color name="aura_cyan_deep">#00B0FF</color>
+    <color name="aura_purple_accent">#7C4DFF</color>
+    <color name="aura_red_sos">#FF3D00</color>
+    <color name="aura_red_sos_dark">#D50000</color>
+
+    <!-- Text Typography Colors -->
+    <color name="aura_text_primary">#FFFFFF</color>
+    <color name="aura_text_secondary">#94A3B8</color>
+
+    <!-- Interactive Elements -->
+    <color name="aura_chip_bg">#151E30</color>
+    <color name="aura_chip_stroke">#26354F</color>
+    <color name="aura_chip_ripple">#334155</color>
+    <color name="aura_online_dot">#00E676</color>
+</resources>
